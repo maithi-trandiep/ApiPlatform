@@ -2,9 +2,32 @@ api_platform:
     title: Hello API Platform
     version: 1.0.0
 
+    show_webby: false
+
     defaults:
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
         extra_properties:
             standard_put: true
+
+        pagination_enabled: true # Enable pagination globally
+        pagination_items_per_page: 30 # Number of elements per page
+        pagination_partial: true # Disable page count
+
+        pagination_client_enabled: true # Allow client to enable pagination
+        pagination_client_items_per_page: true # Allow client to change limit
+        pagination_client_partial: true # Allow client to disable page count
+
+    collection:
+        pagination:
+            enabled_parameter_name: 'pagination'
+            items_per_page_parameter_name: 'itemsPerPage'
+            page_parameter_name: 'page'
+            partial_parameter_name: 'partial'
+
+    swagger:
+        api_keys:
+            JWT:
+                name: Authorization
+                type: header

@@ -2,19 +2,26 @@
 
 namespace App\Entity\Blog;
 
+use ApiPlatform\Doctrine\Common\Filter\SearchFilterInterface;
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Entity\Auth\User;
+use App\Filters\CustomSearchFilter;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
     normalizationContext: ['groups' => ['post:read']],
@@ -24,9 +31,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Post(denormalizationContext: ['groups' => ['post:update', 'post:create']]),
         new Get(normalizationContext: ['groups' => ['post:read', 'post:read:full']]),
         new Patch(denormalizationContext: ['groups' => ['post:update']]),
-        // new Put(), // I don't use PUT, only PATCH
-        new Delete(),
     ],
+)]
+#[ApiFilter(CustomSearchFilter::class, properties: [
+    'title' => CustomSearchFilter::SEARCH_EXACT,
+    'resume' => CustomSearchFilter::SEARCH_EXACT]
 )]
 #[ORM\Entity()]
 class Publication
@@ -34,18 +43,24 @@ class Publication
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
+    #[ApiFilter(CustomSearchFilter::class)]
     #[Groups(['post:read', 'post:update'])]
+    #[Assert\Length(min: 10)]
     #[ORM\Column(length: 255)]
     private string $title = '';
 
+    #[ApiFilter(CustomSearchFilter::class)]
     #[Groups(['post:read', 'post:update'])]
+    #[Assert\Length(min: 20)]
     #[ORM\Column(type: Types::TEXT)]
     private string $resume = '';
 
     #[Groups(['post:read:full', 'post:update'])]
+    #[Assert\Length(min: 50)]
     #[ORM\Column(type: Types::TEXT)]
-    private string $content = 'null';
+    private string $content = '';
 
+    #[ApiFilter(DateFilter::class)]
     #[Groups(['post:read'])]
     #[ORM\Column]
     private ?DateTimeImmutable $createdAt;
@@ -53,6 +68,7 @@ class Publication
     #[ORM\OneToMany(mappedBy: 'post', targetEntity: Comment::class)]
     private Collection $comments;
 
+    #[ApiFilter(SearchFilter::class, strategy: SearchFilterInterface::STRATEGY_EXACT)]
     #[Groups(['post:read', 'post:create'])]
     #[ORM\ManyToOne(inversedBy: 'posts')]
     #[ORM\JoinColumn(nullable: false)]

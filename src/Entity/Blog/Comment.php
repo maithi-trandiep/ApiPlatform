@@ -2,37 +2,50 @@
 
 namespace App\Entity\Blog;
 
+use ApiPlatform\Doctrine\Common\Filter\SearchFilterInterface;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\Entity\Auth\User;
+use App\Filters\CustomSearchFilter;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity()]
+#[ApiResource(
+    uriTemplate: '/publications/{id}/comments',
+    operations: [new GetCollection],
+    uriVariables: [
+        'id' => new Link(toProperty: 'post', fromClass: Publication::class)
+    ]
+)]
 #[ApiResource(
     normalizationContext: ['groups' => ['comment:read']],
     denormalizationContext: ['groups' => ['comment:write']],
     operations: [
         new GetCollection(),
         new Post(),
-        new Get(),
-        new Patch(),
-        // new Put(), // I don't use PUT, only PATCH
-        new Delete(),
     ]
 )]
+#[ApiFilter(SearchFilter::class, strategy: SearchFilterInterface::STRATEGY_START, properties: ['author'])]
+#[ApiFilter(SearchFilter::class, strategy: SearchFilterInterface::STRATEGY_START, properties: ['author.name'])]
+#[ORM\Entity()]
 class Comment
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
+    #[ApiFilter(SearchFilter::class, strategy: SearchFilterInterface::STRATEGY_PARTIAL)]
     #[Groups(['comment:read', 'comment:write'])]
+    #[Assert\Length(min: 5)]
     #[ORM\Column(length: 255)]
     private string $content = '';
 

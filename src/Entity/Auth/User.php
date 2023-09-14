@@ -2,6 +2,8 @@
 
 namespace App\Entity\Auth;
 
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -11,37 +13,41 @@ use ApiPlatform\Metadata\Put;
 use App\Entity\Blog\Comment;
 use App\Entity\Blog\Publication;
 use App\Entity\Shop\Product;
+use App\Filters\CustomSearchFilter;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity()]
-#[ORM\Table(name: '`user`')]
+//#[isGranted('ROLE_ADMIN')]
 #[ApiResource(
-    denormalizationContext: ['groups' => ['user:write:update', 'user:write']],
+    denormalizationContext: ['groups' => ['user:write']],
     normalizationContext: ['groups' => ['user:read']],
     operations: [
         new GetCollection(),
         new Post(),
         new Get(normalizationContext: ['groups' => ['user:read', 'user:read:full']]),
         new Patch(denormalizationContext: ['groups' => ['user:write:update']]),
-        // new Put(), // I don't use PUT, only PATCH
-        // new Delete(), // Disable DELETE method, do soft delete instead
-    ]
+    ],
 )]
-class User
+#[ORM\Table(name: '`user`')]
+#[ORM\Entity()]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ORM\Id, ORM\GeneratedValue, ORM\Column]
-    private ?int $id = null;
+    use Auth;
 
+    #[ApiFilter(CustomSearchFilter::class)]
     #[Groups(['user:read', 'user:write:update'])]
+    #[Assert\Length(min: 2)]
     #[ORM\Column(length: 255)]
     private string $name = '';
 
+    #[ApiFilter(DateFilter::class)]
     #[Groups(['user:read'])]
     #[ORM\Column]
     private DateTimeImmutable $createdAt;
@@ -61,11 +67,6 @@ class User
         $this->comments = new ArrayCollection();
         $this->products = new ArrayCollection();
         $this->createdAt = new DateTimeImmutable();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
     }
 
     public function getName(): string

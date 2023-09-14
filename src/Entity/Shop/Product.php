@@ -2,33 +2,64 @@
 
 namespace App\Entity\Shop;
 
+use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Orm\Filter\NumericFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Entity\Auth\User;
+use App\Filters\CustomSearchFilter;
+use App\GroupGenerator\Shop\ProductGroupGenerator;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity()]
 #[ApiResource(
     normalizationContext: ['groups' => ['product:read']],
     denormalizationContext: ['groups' => ['product:write']],
+    validationContext: ['groups' => ProductGroupGenerator::class],
+    operations: [
+        new GetCollection(),
+        new Post(),
+         new Get(),
+         new Patch(),
+         new Delete(),
+    ]
 )]
 class Product
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
+    #[ApiFilter(CustomSearchFilter::class)]
     #[Groups(['product:read', 'product:write'])]
+    #[Assert\Length(min: 5)]
     #[ORM\Column(length: 255)]
     private string $name = '';
 
-    #[Groups(['product:read', 'product:read:logged', 'product:write'])]
+    #[ApiFilter(NumericFilter::class)]
+    #[Groups(['product:read:logged', 'product:write'])]
+    #[Assert\GreaterThan(value: 0, groups: ['product:create:published'])]
     #[ORM\Column]
     private int $price = 0;
 
-    #[Groups(['product:read', 'admin:manage'])]
+    #[ApiFilter(BooleanFilter::class)]
+    #[Groups(['product:read', 'product:write'])]
+    #[ORM\Column(type: 'boolean')]
+    private bool $published = false;
+
+    #[ApiFilter(DateFilter::class)]
+    #[Groups(['product:read'])]
     #[ORM\Column]
     private DateTimeImmutable $createdAt;
 
@@ -106,5 +137,15 @@ class Product
     public function setDocumentationUrl(string $documentationUrl): void
     {
         $this->documentationUrl = $documentationUrl;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->published;
+    }
+
+    public function setPublished(bool $published): void
+    {
+        $this->published = $published;
     }
 }
