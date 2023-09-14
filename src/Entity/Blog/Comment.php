@@ -2,19 +2,24 @@
 
 namespace App\Entity\Blog;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Entity\Auth\User;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
+#[ApiResource]
 #[ORM\Entity()]
 class Comment
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['groupA'])]
     #[ORM\Column(length: 255)]
     private string $content = '';
 
+    #[Groups(['groupA'])]
     #[ORM\Column]
     private DateTimeImmutable $createdAt;
 

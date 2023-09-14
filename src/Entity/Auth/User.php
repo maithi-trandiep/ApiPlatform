@@ -2,6 +2,13 @@
 
 namespace App\Entity\Auth;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Entity\Blog\Comment;
 use App\Entity\Blog\Publication;
 use App\Entity\Shop\Product;
@@ -9,7 +16,15 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['groupA']]
+        )
+    ]
+)]
 #[ORM\Entity()]
 #[ORM\Table(name: '`user`')]
 class User
@@ -17,6 +32,7 @@ class User
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['groupA'])]
     #[ORM\Column(length: 255)]
     private string $name = '';
 
@@ -26,6 +42,7 @@ class User
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: Publication::class)]
     private Collection $posts;
 
+    #[Groups(['groupA'])]
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: Comment::class)]
     private Collection $comments;
 

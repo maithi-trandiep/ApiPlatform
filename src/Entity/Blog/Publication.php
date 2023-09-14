@@ -2,6 +2,7 @@
 
 namespace App\Entity\Blog;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Entity\Auth\User;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -9,6 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ApiResource]
 #[ORM\Entity()]
 class Publication
 {
@@ -24,7 +26,6 @@ class Publication
     #[ORM\Column(type: Types::TEXT)]
     private string $content = 'null';
 
-    #[Groups(['post:read'])]
     #[ORM\Column]
     private ?DateTimeImmutable $createdAt;
 

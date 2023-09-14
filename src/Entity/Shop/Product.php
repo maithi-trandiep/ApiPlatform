@@ -2,27 +2,40 @@
 
 namespace App\Entity\Shop;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use App\Entity\Auth\User;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+    ],
+    normalizationContext: ['groups' => ['product:read']]
+)]
 #[ORM\Entity()]
 class Product
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(length: 255)]
     private string $name = '';
 
+    #[Groups(['product:read:logged'])]
     #[ORM\Column]
     private int $price = 0;
 
     #[ORM\Column]
     private DateTimeImmutable $createdAt;
 
+    #[Groups(['product:read:authorized'])]
     #[ORM\Column(length: 255)]
     private string $documentationUrl = '';
 
