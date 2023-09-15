@@ -1,6 +1,6 @@
 App\Entity\Auth\User:
-  user_{1..10}:
-    name: '<firstname()>'
+  user_{1..50}:
+    email: '<email()>'
 
 App\Entity\Blog\Publication:
   publication_{@user_*}:
@@ -10,13 +10,13 @@ App\Entity\Blog\Publication:
     content: '<paragraph()>'
 
 App\Entity\Blog\Comment:
-  comment_{1..50}:
+  comment_{1..500}:
     content: '<sentences(1, true)>'
     post: '@publication_user_<rand(1, 10)>'
     author: '@user_<rand(1, 10)>'
 
 App\Entity\Shop\Product:
-  product_{1..50}:
+  product_{1..100}:
     name: '<title()>'
     price: '<rand(20, 5000)>'
     documentationUrl: '<url()>'
