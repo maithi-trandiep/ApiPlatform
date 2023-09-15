@@ -3,13 +3,28 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ApiResource]
-#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
+    operations: [
+        new GetCollection(),
+        new Get(),
+        new Post(),
+        new Patch(),
+    ]
+)]
+#[ORM\Entity()]
 #[ORM\Table(name: '`user`')]
 class User
 {
@@ -18,9 +33,11 @@ class User
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['recipe:read', 'comment:read'])]
     #[ORM\Column(length: 255)]
     private ?string $firstName = null;
 
+    #[Groups(['recipe:read'])]
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 

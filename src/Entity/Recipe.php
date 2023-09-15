@@ -13,51 +13,65 @@ use ApiPlatform\Metadata\Put;
 use App\Repository\RecipeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\AsciiStringType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
-#[ORM\Entity(repositoryClass: RecipeRepository::class)]
+#[ORM\Entity]
 #[ApiResource(
+    normalizationContext: ['groups' => ['recipe:read']],
+    denormalizationContext: ['groups' => ['recipe:write']],
     operations: [
         new GetCollection(),
-        new Get(),
+        new Get(
+            normalizationContext: ['groups' => ['recipe:read', 'recipe:read:full']]
+        ),
         new Post(),
         new Delete(),
-        new Patch(),
-        new Put(),
-    ]
+        new Patch(
+            denormalizationContext: ['groups' => ['recipe:write', 'recipe:write:update']],
+        ),
+    ],
 )]
 class Recipe
 {
-    #[ApiProperty(identifier: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['recipe:read', 'recipe:write'])]
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
-    #[ApiProperty(identifier: true)]
+    #[Groups(['recipe:read', 'recipe:write:update'])]
     #[ORM\Column(length: 255)]
     private ?string $code = null;
 
+    #[Groups(['recipe:read'])]
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    #[Groups(['recipe:read', 'recipe:write'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
+    #[Groups(['recipe:read', 'recipe:write'])]
     #[ORM\Column]
-    private ?int $difficulty = null;
+    private ?int $difficulty = 0;
 
+    #[Groups(['recipe:read'])]
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Quantity::class)]
     private Collection $quantities;
 
+    #[Groups(['recipe:read'])]
     #[ORM\ManyToOne(inversedBy: 'recipes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $creator = null;
 
+    #[Groups(['recipe:read:full'])]
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Comment::class)]
     private Collection $comments;
 
@@ -81,6 +95,10 @@ class Recipe
     public function setTitle(string $title): static
     {
         $this->title = $title;
+
+        $slugger = new AsciiSlugger();
+        $code = $slugger->slug($title)->snake()->toString();
+        $this->setCode($code);
 
         return $this;
     }

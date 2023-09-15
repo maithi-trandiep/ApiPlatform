@@ -3,12 +3,15 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use App\Repository\CommentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ApiResource]
-#[ORM\Entity(repositoryClass: CommentRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['comment:read']],
+    denormalizationContext: ['groups' => ['comment:write']],
+)]
+#[ORM\Entity()]
 class Comment
 {
     #[ORM\Id]
@@ -16,16 +19,20 @@ class Comment
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['recipe:read:full', 'comment:read', 'comment:write'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
+    #[Groups(['recipe:read:full', 'comment:read', 'comment:write'])]
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $creator = null;
 
+    #[Groups(['comment:read'])]
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[Groups(['comment:write'])]
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Recipe $recipe = null;

@@ -3,10 +3,22 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\QuantityRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['recipe:read']],
+    denormalizationContext: ['groups' => ['recipe:write']],
+    operations: [
+        new Post(),
+        new Patch(),
+        new Delete(),
+    ]
+)]
 #[ORM\Entity(repositoryClass: QuantityRepository::class)]
 class Quantity
 {
@@ -15,17 +27,21 @@ class Quantity
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['recipe:write'])]
     #[ORM\ManyToOne(inversedBy: 'quantities')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Recipe $recipe = null;
 
+    #[Groups(['recipe:read', 'recipe:write'])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Ingredient $ingredient = null;
 
+    #[Groups(['recipe:read', 'recipe:write'])]
     #[ORM\Column]
     private ?int $quantity = null;
 
+    #[Groups(['recipe:read', 'recipe:write'])]
     #[ORM\Column(length: 255)]
     private ?string $type = null;
 
