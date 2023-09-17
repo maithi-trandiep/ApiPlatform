@@ -17,6 +17,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     provider: ColorStateProvider::class,
     processor: ColorStateProcessor::class,
     normalizationContext: ['groups' => ['color:read']],
+    denormalizationContext: ['groups' => ['color:write']],
     operations: [
         new GetCollection(),
         new Get(),
@@ -52,6 +53,7 @@ class Color
         return $this->name;
     }
 
+    #[Groups(['color:write'])]
     public function setName(string $name): void
     {
         $this->name = $name;
@@ -64,9 +66,16 @@ class Color
         return $this->hexa;
     }
 
+    #[Groups(['color:write'])]
     public function setHexa(string $hexa): void
     {
         $this->hexa = $hexa;
+
+        [$r, $g, $b] = sscanf($hexa, "#%02x%02x%02x");
+
+        $this->red = $r;
+        $this->green = $g;
+        $this->blue = $b;
     }
 
     public function getRed(): int

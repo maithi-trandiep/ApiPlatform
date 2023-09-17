@@ -40,7 +40,7 @@ class ColorStateProcessor implements ProcessorInterface
     protected function writeInFile(array $data): void
     {
         $filePath = $this->kernel->getProjectDir() . ColorStateProvider::COLOR_CSV_PATH;
-        $file = fopen($filePath, 'wb');
+        $file = fopen($filePath, 'ab');
         fputcsv($file, $data);
         fclose($file);
     }
