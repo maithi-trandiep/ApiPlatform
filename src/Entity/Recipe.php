@@ -75,6 +75,8 @@ class Recipe
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Comment::class)]
     private Collection $comments;
 
+    private bool $isWip;
+
     public function __construct()
     {
         $this->quantities = new ArrayCollection();
@@ -221,5 +223,10 @@ class Recipe
         }
 
         return $this;
+    }
+
+    public function isWip(): bool
+    {
+        return $this->isWip;
     }
 }
