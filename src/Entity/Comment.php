@@ -2,7 +2,14 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -10,7 +17,27 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     normalizationContext: ['groups' => ['comment:read']],
     denormalizationContext: ['groups' => ['comment:write']],
+    operations: [
+        new GetCollection(
+            uriTemplate: '/recipes/{id}/comments',
+            uriVariables: [
+                'id' => new Link(fromClass: Recipe::class, fromProperty: 'id', toProperty: 'recipe')
+            ]
+        ),
+        new Post(
+            uriTemplate: '/recipes/{id}/comments',
+            uriVariables: [
+                'id' => new Link(fromClass: Recipe::class, fromProperty: 'id', toProperty: 'recipe')
+            ]
+        ),
+        new Delete(),
+        new Patch(),
+    ]
 )]
+#[ApiFilter(SearchFilter::class, properties: [
+    'creator' => SearchFilter::STRATEGY_EXACT,
+    'creator.firstName' => SearchFilter::STRATEGY_PARTIAL,
+])]
 #[ORM\Entity()]
 class Comment
 {

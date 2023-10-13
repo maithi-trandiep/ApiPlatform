@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\QuantityRepository;
@@ -14,7 +15,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['recipe:read']],
     denormalizationContext: ['groups' => ['recipe:write']],
     operations: [
-        new Post(),
+        new Post(
+            uriTemplate: '/recipes/{id}/quantities',
+            uriVariables: [
+                'id' => new Link(fromClass: Recipe::class, fromProperty: 'id', toProperty: 'recipe')
+            ]
+        ),
         new Patch(),
         new Delete(),
     ]

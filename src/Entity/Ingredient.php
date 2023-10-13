@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,7 +15,13 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['ingredient:read']],
     denormalizationContext: ['groups' => ['ingredient:write']],
     operations: [
-        new Post(),
+        new Post(
+            uriTemplate: '/recipes/{recipe}/quantities/{quantity}/ingredients/',
+            uriVariables: [
+                'recipe' => new Link(fromClass: Recipe::class, fromProperty: 'id'),
+                'quantity' => new Link(fromClass: Quantity::class, fromProperty: 'id')
+            ]
+        ),
         new Patch(),
         new Delete(),
     ]

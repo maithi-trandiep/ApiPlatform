@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -9,8 +12,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
-use App\Repository\RecipeRepository;
+use App\Filters\CustomSearchFilter;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\AsciiStringType;
@@ -42,19 +44,21 @@ class Recipe
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ApiFilter(CustomSearchFilter::class)]
     #[Groups(['recipe:read', 'recipe:write'])]
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
-    #[Groups(['recipe:read', 'recipe:write:update'])]
+    #[Groups(['recipe:read:user-is-logged', 'recipe:write'])]
     #[ORM\Column(length: 255)]
     private ?string $code = null;
 
+    #[ApiFilter(DateFilter::class)]
     #[Groups(['recipe:read'])]
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    #[Groups(['recipe:read', 'recipe:write'])]
+    #[Groups(['recipe:read:user-is-logged', 'recipe:write'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
@@ -66,7 +70,7 @@ class Recipe
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Quantity::class)]
     private Collection $quantities;
 
-    #[Groups(['recipe:read'])]
+    #[Groups(['recipe:read', 'recipe:write'])]
     #[ORM\ManyToOne(inversedBy: 'recipes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $creator = null;
@@ -75,7 +79,8 @@ class Recipe
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Comment::class)]
     private Collection $comments;
 
-    private bool $isWip;
+    #[Groups(['recipe:read:is-wip'])]
+    private bool $isWip = true;
 
     public function __construct()
     {
@@ -225,7 +230,7 @@ class Recipe
         return $this;
     }
 
-    public function isWip(): bool
+    public function getIsWip(): bool
     {
         return $this->isWip;
     }

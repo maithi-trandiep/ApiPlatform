@@ -3,15 +3,16 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use App\Repository\UserRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource(
@@ -24,25 +25,29 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Patch(),
     ]
 )]
-#[ORM\Entity()]
+#[ORM\Entity]
 #[ORM\Table(name: '`user`')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['recipe:read', 'comment:read'])]
+    #[Groups(['recipe:read', 'comment:read', 'user:read'])]
     #[ORM\Column(length: 255)]
     private ?string $firstName = null;
 
-    #[Groups(['recipe:read'])]
+    #[Groups(['recipe:read', 'user:write', 'user:read'])]
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private array $roles = [];
+
+    #[Groups(['user:read'])]
+    #[ORM\Column]
+    private DateTimeImmutable $createdAt;
 
     #[ORM\OneToMany(mappedBy: 'creator', targetEntity: Recipe::class)]
     private Collection $recipes;
@@ -50,10 +55,16 @@ class User
     #[ORM\OneToMany(mappedBy: 'creator', targetEntity: Comment::class)]
     private Collection $comments;
 
+    #[ORM\Column]
+    private ?string $password = null;
+
+    #[Groups(['user:write'])]
+    private string $plainPassword = '';
+
     public function __construct()
     {
         $this->recipes = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
         $this->comments = new ArrayCollection();
     }
 
@@ -83,15 +94,69 @@ class User
     {
         $this->email = $email;
 
+        $this->firstName = current(explode('@', $email)) ?: '';
+
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+         $this->plainPassword = '';
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
@@ -118,11 +183,9 @@ class User
 
     public function removeRecipe(Recipe $recipe): static
     {
-        if ($this->recipes->removeElement($recipe)) {
-            // set the owning side to null (unless already changed)
-            if ($recipe->getCreator() === $this) {
-                $recipe->setCreator(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->recipes->removeElement($recipe) && $recipe->getCreator() === $this) {
+            $recipe->setCreator(null);
         }
 
         return $this;
@@ -148,13 +211,21 @@ class User
 
     public function removeComment(Comment $comment): static
     {
-        if ($this->comments->removeElement($comment)) {
-            // set the owning side to null (unless already changed)
-            if ($comment->getCreator() === $this) {
-                $comment->setCreator(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->comments->removeElement($comment) && $comment->getCreator() === $this) {
+            $comment->setCreator(null);
         }
 
         return $this;
+    }
+
+    public function getPlainPassword(): string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(string $plainPassword): void
+    {
+        $this->plainPassword = $plainPassword;
     }
 }

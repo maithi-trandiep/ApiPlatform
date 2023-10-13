@@ -2,6 +2,12 @@ api_platform:
     title: Hello API Platform
     version: 1.0.0
 
+    swagger:
+        api_keys:
+            JWT:
+                name: Authorization
+                type: header
+
     show_webby: false
 
     defaults:
