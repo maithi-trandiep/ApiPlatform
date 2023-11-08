@@ -26,7 +26,60 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Get(),
         new Post(),
         new Patch(),
+//        new HttpOperation(
+//            method: Request::METHOD_POST,
+//            uriTemplate: '/users/{id}/ban',
+//            controller: BanUserAction::class,
+//            openapi: new Operation(
+//                tags: ['User Management', 'User'],
+//                summary: 'Ban a user account',
+//                description: 'Ban a user for some reason',
+//                requestBody: new RequestBody(
+//                    content: new ArrayObject([
+//                        'application/json' => [
+//                            'schema' => [
+//                                'type' => 'object',
+//                                'properties' => [
+//                                    'reason' => ['type' => 'string'],
+//                                ]
+//                            ],
+//                            'example' => [
+//                                'reason' => 'Say insults, nsfw picture, ...',
+//                            ]
+//                        ]
+//                    ]),
+//                ),
+//                responses: [
+//                    HTTPResponse::HTTP_OK => new Response(description: 'User has been banned', content: new ArrayObject([
+//                        'application/json' => [
+//                            'schema' => [
+//                                'type' => 'object',
+//                                'properties' => [
+//                                    'until' => ['type' => 'string', 'format' => 'date-time'],
+//                                ],
+//                            ],
+//                            'example' => [
+//                                'until' => '2023-12-31T23:59:59Z',
+//                            ],
+//                        ]
+//                    ])),
+//                    HTTPResponse::HTTP_FORBIDDEN => new Response(description: "User can't be banned."),
+//                    HTTPResponse::HTTP_NOT_FOUND => new Response(description: 'User not found.'),
+//                    HTTPResponse::HTTP_CREATED => new Response(description: 'Ø Not used Ø'),
+//                    HTTPResponse::HTTP_BAD_REQUEST => new Response(description: 'Ø Not used Ø'),
+//                    HTTPResponse::HTTP_UNPROCESSABLE_ENTITY => new Response(description: 'Ø Not used Ø'),
+//                ]
+//            )
+//        ),
     ],
+//    graphQlOperations: [
+//        new Query(),
+//        new Query(name: 'CustomQuery', args: [
+//            'where' => ['type' => 'UserWhereInput'],
+//            'order' => ['type' => 'UserOrderInput'],
+//            'pagination' => ['type' => 'PaginationInput'],
+//        ])
+//    ]
 )]
 #[ORM\Entity]
 #[ORM\Table(name: '`user`')]
@@ -59,7 +112,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $comments;
 
     #[ORM\Column]
-    private ?string $password = null;
+    private string $password = '';
 
     #[Groups(['user:write'])]
     private string $plainPassword = '';

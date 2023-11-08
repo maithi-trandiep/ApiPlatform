@@ -2,7 +2,6 @@ App\Entity\User:
   user_{1..50}:
     firstName: '<name()>'
     email: '<email()>'
-    plainPassword: 'motdepasse'
 
 App\Entity\Ingredient:
   ingredient_{1..100}:

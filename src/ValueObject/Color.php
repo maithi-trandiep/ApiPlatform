@@ -111,6 +111,6 @@ class Color
     #[Groups(['color:read'])]
     public function getCssFormat(): string
     {
-        return "rgb({$this->red}, {$this->green}, {$this->getBlue()})";
+        return "rgb($this->red, $this->green, $this->blue)";
     }
 }
