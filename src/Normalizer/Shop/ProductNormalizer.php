@@ -25,8 +25,10 @@ class ProductNormalizer implements NormalizerInterface, NormalizationAwareInterf
         /** @var ?User $user */
         $user = $this->security->getUser();
 
+        assert($object instanceof Product);
+
         if ($user?->hasProduct($object) ?? false) {
-            $context['groups'][] = ProductGroupsEnum::READ_AS_AUTHORIZED_USER;
+            $context['groups'][] = 'product:read:is-buyer';
         }
 
         return $this->normalizer->normalize($object, $format, $context);

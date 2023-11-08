@@ -38,7 +38,7 @@ class ProductContextBuilder implements SerializerContextBuilderInterface
             return $context;
         }
 
-        $context['groups'][] = 'product:read:logged';
+        $context['groups'][] = 'product:read:is-logged';
 
         return $context;
     }

@@ -11,6 +11,8 @@ api_platform:
         extra_properties:
             standard_put: true
 
+#        pagination_enabled: false
+
     swagger:
         api_keys:
             JWT:
@@ -19,3 +21,12 @@ api_platform:
 
     resource_class_directories:
         - '%kernel.project_dir%/src/ValueObject'
+
+    formats:
+        jsonld: [ 'application/ld+json' ]
+        html: [ 'text/html' ]
+        json: [ 'application/json' ]
+
+
+#    graphql:
+#        graphql_playground: false

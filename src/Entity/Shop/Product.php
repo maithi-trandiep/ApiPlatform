@@ -13,7 +13,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Entity\Auth\User;
-use App\Filters\CustomSearchFilter;
+use App\Filter\CustomSearchFilter;
 use App\GroupGenerator\Shop\ProductGroupGenerator;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -47,7 +47,7 @@ class Product
     private string $name = '';
 
     #[ApiFilter(NumericFilter::class)]
-    #[Groups(['product:read:logged', 'product:write'])]
+    #[Groups(['product:read:is-logged', 'product:write'])]
     #[Assert\GreaterThan(value: 0, groups: ['product:create:published'])]
     #[ORM\Column]
     private int $price = 0;
