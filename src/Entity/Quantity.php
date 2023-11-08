@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ApiResource(
-    normalizationContext: ['groups' => ['recipe:read']],
+    normalizationContext: ['groups' => ['recipe:read-default']],
     denormalizationContext: ['groups' => ['recipe:write']],
     operations: [
         new Post(
@@ -38,16 +38,16 @@ class Quantity
     #[ORM\JoinColumn(nullable: false)]
     private ?Recipe $recipe = null;
 
-    #[Groups(['recipe:read', 'recipe:write'])]
+    #[Groups(['recipe:read-default', 'recipe:write'])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Ingredient $ingredient = null;
 
-    #[Groups(['recipe:read', 'recipe:write'])]
+    #[Groups(['recipe:read-default', 'recipe:write'])]
     #[ORM\Column]
     private ?int $quantity = null;
 
-    #[Groups(['recipe:read', 'recipe:write'])]
+    #[Groups(['recipe:read-default', 'recipe:write'])]
     #[ORM\Column(length: 255)]
     private ?string $type = null;
 

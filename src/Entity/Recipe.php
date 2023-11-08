@@ -23,12 +23,16 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
 
 #[ORM\Entity]
 #[ApiResource(
-    normalizationContext: ['groups' => ['recipe:read']],
+    normalizationContext: ['groups' => ['recipe:read-default']],
     denormalizationContext: ['groups' => ['recipe:write']],
     operations: [
         new GetCollection(),
+        new GetCollection(
+            uriTemplate: '/recipes/list',
+            normalizationContext: ['groups' => ['recipe:read-list']]
+        ),
         new Get(
-            normalizationContext: ['groups' => ['recipe:read', 'recipe:read:full']]
+            normalizationContext: ['groups' => ['recipe:read-default', 'recipe:read-full']]
         ),
         new Post(),
         new Delete(),
@@ -45,7 +49,7 @@ class Recipe
     private ?int $id = null;
 
     #[ApiFilter(CustomSearchFilter::class)]
-    #[Groups(['recipe:read', 'recipe:write'])]
+    #[Groups(['recipe:read-default', 'recipe:write', 'recipe:read-list'])]
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
@@ -54,7 +58,7 @@ class Recipe
     private ?string $code = null;
 
     #[ApiFilter(DateFilter::class)]
-    #[Groups(['recipe:read'])]
+    #[Groups(['recipe:read-default'])]
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -62,20 +66,20 @@ class Recipe
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
-    #[Groups(['recipe:read', 'recipe:write'])]
+    #[Groups(['recipe:read-default', 'recipe:write'])]
     #[ORM\Column]
     private ?int $difficulty = 0;
 
-    #[Groups(['recipe:read'])]
+    #[Groups(['recipe:read-default'])]
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Quantity::class)]
     private Collection $quantities;
 
-    #[Groups(['recipe:read', 'recipe:write'])]
+    #[Groups(['recipe:read-default', 'recipe:write'])]
     #[ORM\ManyToOne(inversedBy: 'recipes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $creator = null;
 
-    #[Groups(['recipe:read:full'])]
+    #[Groups(['recipe:read-full'])]
     #[ORM\OneToMany(mappedBy: 'recipe', targetEntity: Comment::class)]
     private Collection $comments;
 

@@ -5,12 +5,15 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Action\User\BanUser;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -23,7 +26,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Get(),
         new Post(),
         new Patch(),
-    ]
+    ],
 )]
 #[ORM\Entity]
 #[ORM\Table(name: '`user`')]
@@ -34,11 +37,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['recipe:read', 'comment:read', 'user:read'])]
+    #[Groups(['recipe:read-default', 'comment:read', 'user:read'])]
     #[ORM\Column(length: 255)]
     private ?string $firstName = null;
 
-    #[Groups(['recipe:read', 'user:write', 'user:read'])]
+    #[Groups(['recipe:read-default', 'user:write', 'user:read'])]
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 

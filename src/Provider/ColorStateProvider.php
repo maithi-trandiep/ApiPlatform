@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class ColorStateProvider implements ProviderInterface
 {
-    public const COLOR_CSV_PATH = '/var/uploads/colors.csv';
+    public const COLOR_CSV_PATH = '/src/Assets/colors.csv';
 
     public function __construct(
         protected KernelInterface $kernel,
@@ -36,7 +36,14 @@ class ColorStateProvider implements ProviderInterface
 
         $file = fopen($filePath, 'rb');
         while (($line = fgetcsv($file)) !== FALSE) {
-            $color = new Color(...$line);
+            $color = new Color(
+                id: $line[0],
+                name: $line[1],
+                hexa: $line[2],
+                red: (int) $line[3],
+                green: (int) $line[4],
+                blue: (int) $line[5],
+            );
             $result[$color->getHexa()] = $color;
         }
         fclose($file);

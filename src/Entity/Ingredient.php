@@ -36,7 +36,7 @@ class Ingredient
     private ?int $id = null;
 
     #[ApiProperty(identifier: true)]
-    #[Groups(['recipe:read', 'ingredient:write'])]
+    #[Groups(['recipe:read-default', 'ingredient:write'])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 

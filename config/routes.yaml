@@ -7,3 +7,15 @@
 auth:
   path: /auth
   methods: ['POST']
+
+api_graphql_entrypoint:
+  path: /api/graphql
+  controller: api_platform.graphql.action.entrypoint
+
+graphiql:
+  path: /api/docs/graphiql
+  controller: api_platform.graphql.action.graphiql
+
+graphql_playground:
+  path: /api/docs/graphql_playground
+  controller: api_platform.graphql.action.graphql_playground

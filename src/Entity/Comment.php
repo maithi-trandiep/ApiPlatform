@@ -46,11 +46,11 @@ class Comment
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['recipe:read:full', 'comment:read', 'comment:write'])]
+    #[Groups(['recipe:read-full', 'comment:read', 'comment:write'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
-    #[Groups(['recipe:read:full', 'comment:read', 'comment:write'])]
+    #[Groups(['recipe:read-full', 'comment:read', 'comment:write'])]
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $creator = null;
